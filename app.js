@@ -28,9 +28,9 @@ page.onConsoleMessage = function(msg) {
   console.log('console -> ' + msg);
 };
 
-page.onLoadFinished = function() {
-  page.render('googl-home-page.png');
-};
+// page.onLoadFinished = function() {
+//   page.render('googl-home-page.png');
+// };
 
 // page.onResourceRequested = function(requestData, networkRequest) {
 //   console.log('Request (#' + requestData.id + '): ' + JSON.stringify(requestData));
@@ -68,7 +68,44 @@ page.open(url, function(status) {
             }, function() {
               page.render('google-search.png');
               console.log('render done');
-              phantom.exit(0);
+
+              // 搜尋結果連結
+              var searchResult = page.evaluate(function() {
+                  var _array = [];
+                  $('.srg .g .r a').each(function(i,k) {
+                      var a = $(k).attr('href');
+                      var txt = $(k).text()
+                      _array.push({
+                        'title' : txt,
+                        'link': a,
+                        'isLoadFinished': false
+                      });
+                  });
+                  return _array;
+              });
+              // console.log(searchResult);
+
+              var testLink = searchResult[1].link;
+              var testTitle = searchResult[1].title;
+              console.log(testTitle + ':'+ testLink);
+
+              page.onLoadFinished = function() {
+                page.render(testTitle +'.png');
+                console.log(testTitle +'.png render done');
+              };
+
+              page.open(testLink, function(status) {
+
+                if (status !== 'success') {
+                  console.log("Can't open "+ testLink);
+                  console.log('Unable to access network');
+                  phantom.exit(1);
+                  return;
+                }
+                phantom.exit(0);
+              });
+
+              // phantom.exit(0);
             });
 
             // page.onLoadFinished = function() {
