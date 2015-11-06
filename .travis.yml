@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+- 0.10
+notifications:
+  email: false
+before_script:
+- phantomjs --version
+script:
+- phantomjs app.js
+after_success:
+- echo "After success stage"
+after_failure:
+- echo "After failure stage"
